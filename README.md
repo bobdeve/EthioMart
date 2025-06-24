@@ -1,58 +1,68 @@
-EthioMart Telegram E-commerce NER Project
-Overview
-This project aims to build EthioMart, a centralized e-commerce platform consolidating product listings, prices, and locations extracted from multiple Ethiopian Telegram-based e-commerce channels. Due to the fragmented nature of Telegram business channels, customers face difficulties navigating and interacting with multiple vendors. EthioMart solves this by extracting structured data using advanced Natural Language Processing (NLP) techniques on Amharic text.
+# 📊 Telegram E-commerce Vendor Analysis
 
-Technical Workflow
-1. Data Collection
-Source: Public Telegram e-commerce channels relevant to Ethiopian markets.
+This project analyzes e-commerce activity on Telegram channels to evaluate vendors for potential **lending opportunities** using **data science and NLP techniques**.
 
-Method: Automated scraping scripts using Python’s telethon and BeautifulSoup libraries to harvest message text.
+---
 
-Data Size: Thousands of raw messages containing product descriptions, prices, and location information.
+## 🗂️ Project Overview
 
-2. Data Preprocessing & Annotation
-Cleaning: Text normalization, tokenization, and removal of noise such as emojis and URLs.
+We scraped vendor data from Ethiopian Telegram-based e-commerce channels and built a pipeline to:
 
-Annotation Format: Converted raw text into the CoNLL format for Named Entity Recognition (NER), labeling tokens with BIO tags (B-Product, I-Product, B-PRICE, I-PRICE, B-LOC, I-LOC, O).
+- Analyze **channel activity and consistency**
+- Evaluate **market reach and customer engagement**
+- Extract **product pricing** using a custom NER model
+- Interpret predictions using **SHAP** and **LIME**
+- Combine these into a **Lending Score** to rank vendors for business financing opportunities
 
-Tools: Manual annotation aided by custom Python scripts and validation checks.
+---
 
-3. Model Selection & Fine-Tuning
-Models Fine-Tuned:
+## 📥 Data Collected
 
-XLM-RoBERTa-base — a transformer-based multilingual model with state-of-the-art performance on many NER tasks.
+- **Fields:** `channel`, `message_id`, `date`, `text`, `views`
+- Scraped directly from Telegram using Python + Telethon
 
-BERT-base-multilingual-cased (mBERT) — a lighter multilingual BERT variant suitable for resource-constrained environments.
+---
 
-Framework: Hugging Face transformers and datasets libraries for streamlined dataset loading, tokenization, and training loops.
+## 📈 Analysis Modules
 
-Training Setup:
+### ✅ Activity & Consistency
+- **Metric:** Average posts per week
+- Purpose: Measures if the vendor is actively posting products
 
-Utilized Google Colab with GPU acceleration.
+### ✅ Market Reach & Engagement
+- **Metrics:** 
+  - Average views per post (customer reach)
+  - Top-performing post (with product name & price using NER)
 
-Applied tokenization with padding and truncation for consistent input lengths.
+### ✅ Product Pricing Insights (NER)
+- Fine-tuned **Amharic NER model** using Transformers
+- Extracted product prices from posts
+- Computed **average price point per vendor**
 
-Aligned token-level labels with subword tokens during tokenization.
+---
 
-Configured TrainingArguments for batch size, learning rate, number of epochs, and evaluation strategies.
+## 🔍 Model Interpretability
 
-Evaluation Metrics: Precision, Recall, F1-score computed using the seqeval library.
+### SHAP (SHapley Additive Explanations)
+- Interpreted NER model predictions at token level
+- Visualized important tokens influencing entity classification
 
-4. Results & Model Comparison
-XLM-RoBERTa-base achieved superior F1-scores (~0.70), balancing precision and recall well for product and price entities.
+### LIME (Local Interpretable Model-agnostic Explanations)
+- Provided localized explanation for individual product posts
+- Identified which parts of the sentence influenced predictions
 
-mBERT delivered faster training times but slightly lower accuracy (F1 ~0.60), making it suitable for lighter deployments.
+---
 
-Models were saved and exported using Hugging Face’s save_pretrained() method for easy future inference.
+## 💸 Lending Score
 
-Tools & Libraries Used
-Component	Technology / Library
-Data Scraping	Python telethon, BeautifulSoup
-Data Processing	Python, Pandas, Regex
-Annotation Format	CoNLL (BIO tagging)
-Model Fine-tuning	Hugging Face transformers
-Dataset Handling	Hugging Face datasets
-Tokenization	Hugging Face Tokenizers
-Training Environment	Google Colab with GPU
-Evaluation Metrics	seqeval for NER metrics
-Experiment Tracking	Weights & Biases (W&B)
+A final **Lending Score** was computed for each vendor using:
+
+```python
+Score = (Normalized Avg Views × 0.6) + (Normalized Posting Frequency × 0.4)
+🏆 Top 5 Vendors (Example Output)
+Rank	Channel	Score	Avg Views	Posts/Week
+1	Leyueqa	0.73	42,504	14.3
+2	qnashcom	0.66	24,772	30.7
+3	ethio_brand_collection	0.58	36,954	8.3
+4	MerttEka	0.52	25,719	17.5
+5	AwasMart	0.49	8,814	36.9
